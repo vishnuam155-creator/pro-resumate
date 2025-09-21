@@ -342,7 +342,7 @@ export const ResumeUploader: React.FC<ResumeUploaderProps> = ({
         <Button 
           variant="hero" 
           size="lg" 
-          className="flex-1 h-12 sm:h-auto"
+          className="flex-1 h-14 sm:h-auto"
           onClick={() => handleSubmit('percentage')}
           disabled={isLoading}
         >
@@ -358,7 +358,7 @@ export const ResumeUploader: React.FC<ResumeUploaderProps> = ({
         <Button 
           variant="corporate" 
           size="lg" 
-          className="flex-1 h-12 sm:h-auto"
+          className="flex-1 h-14 sm:h-auto"
           onClick={() => handleSubmit('review')}
           disabled={isLoading}
         >
