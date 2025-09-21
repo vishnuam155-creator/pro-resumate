@@ -1,12 +1,159 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import React, { useState, useEffect } from 'react';
+import { Header } from '@/components/Header';
+import { AuthModal } from '@/components/AuthModal';
+import { ResumeUploader } from '@/components/ResumeUploader';
+import { UpgradeModal } from '@/components/UpgradeModal';
+import { Footer } from '@/components/Footer';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
+import { Lock } from 'lucide-react';
+
+interface UsageInfo {
+  uploads_used: number;
+  limit: number;
+  plan: string;
+}
 
 const Index = () => {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+  const { user, authToken, isLoading, login, logout } = useAuth();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  const [isLoginWarningOpen, setIsLoginWarningOpen] = useState(false);
+  const [usageInfo, setUsageInfo] = useState<UsageInfo | null>(null);
+  
+  const [typedText, setTypedText] = useState('');
+  const fullText = "Stop getting lost in the resume black hole. Our AI-powered ATS Resume Checker and Builder helps you craft a professional resume that gets noticed by recruiters";
+
+  // Typing animation effect
+  useEffect(() => {
+    let index = 0;
+    const timer = setInterval(() => {
+      if (index < fullText.length) {
+        setTypedText(fullText.slice(0, index + 1));
+        index++;
+      } else {
+        clearInterval(timer);
+      }
+    }, 50);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleAuthSuccess = (token: string, username: string, plan: string) => {
+    login(token, username, plan);
+  };
+
+  const handleLoginRequired = () => {
+    setIsLoginWarningOpen(true);
+  };
+
+  const handleUpgradeRequired = () => {
+    setIsUpgradeModalOpen(true);
+  };
+
+  const handleUsageUpdate = (usage: UsageInfo) => {
+    setUsageInfo(usage);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Loading QuotientOne ATS...</p>
+        </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-hero">
+      <Header 
+        user={user} 
+        onLoginClick={() => setIsAuthModalOpen(true)}
+        onLogout={logout}
+      />
+      
+      <main className="container mx-auto px-4 py-8">
+        {/* Hero Section */}
+        <div className="text-center mb-12 animate-fade-in">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-balance">
+            <span className="gradient-text">Document Upload</span>
+            <br />
+            <span className="text-foreground">and Job Description</span>
+          </h1>
+          
+          <div className="max-w-3xl mx-auto mb-8">
+            <p className="text-lg text-muted-foreground leading-relaxed min-h-[3rem]">
+              {typedText}
+              <span className="animate-pulse">|</span>
+            </p>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="max-w-4xl mx-auto animate-slide-up">
+          <ResumeUploader
+            authToken={authToken}
+            usageInfo={usageInfo}
+            onUsageUpdate={handleUsageUpdate}
+            onLoginRequired={handleLoginRequired}
+            onUpgradeRequired={handleUpgradeRequired}
+          />
+        </div>
+      </main>
+
+      <Footer />
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onAuthSuccess={handleAuthSuccess}
+      />
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        isOpen={isUpgradeModalOpen}
+        onClose={() => setIsUpgradeModalOpen(false)}
+        currentPlan={user?.plan || 'guest'}
+      />
+
+      {/* Login Warning Dialog */}
+      <Dialog open={isLoginWarningOpen} onOpenChange={setIsLoginWarningOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="text-center space-y-4">
+            <div className="mx-auto w-12 h-12 bg-warning/10 rounded-full flex items-center justify-center">
+              <Lock className="h-6 w-6 text-warning" />
+            </div>
+            <DialogTitle className="text-xl">Login Required</DialogTitle>
+            <DialogDescription className="text-center">
+              You have reached the free upload limit.<br />
+              Please login to continue with more uploads.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 mt-6">
+            <Button 
+              variant="hero" 
+              className="w-full"
+              onClick={() => {
+                setIsLoginWarningOpen(false);
+                setIsAuthModalOpen(true);
+              }}
+            >
+              Login / Sign Up
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={() => setIsLoginWarningOpen(false)}
+            >
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
