@@ -342,7 +342,7 @@ export const ResumeUploader: React.FC<ResumeUploaderProps> = ({
         <Button 
           variant="hero" 
           size="lg" 
-          className="flex-1"
+          className="flex-1 h-12 sm:h-auto"
           onClick={() => handleSubmit('percentage')}
           disabled={isLoading}
         >
@@ -358,7 +358,7 @@ export const ResumeUploader: React.FC<ResumeUploaderProps> = ({
         <Button 
           variant="corporate" 
           size="lg" 
-          className="flex-1"
+          className="flex-1 h-12 sm:h-auto"
           onClick={() => handleSubmit('review')}
           disabled={isLoading}
         >
@@ -381,8 +381,8 @@ export const ResumeUploader: React.FC<ResumeUploaderProps> = ({
               dangerouslySetInnerHTML={{ __html: result }}
             />
             
-            <div className="mt-6 p-4 bg-warning/10 border border-warning/20 rounded-lg">
-              <p className="text-sm text-warning-foreground font-medium">
+            <div className="mt-6 p-4 bg-primary/10 border border-primary/20 rounded-lg">
+              <p className="text-sm text-primary-foreground font-medium">
                 💡 Pro Tip: If your resume score is below 70%, consider creating a new resume tailored to the job requirements.
               </p>
             </div>
