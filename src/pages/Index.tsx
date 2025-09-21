@@ -3,6 +3,7 @@ import { Header } from '@/components/Header';
 import { AuthModal } from '@/components/AuthModal';
 import { ResumeUploader } from '@/components/ResumeUploader';
 import { UpgradeModal } from '@/components/UpgradeModal';
+import { CreateResumeModal } from '@/components/CreateResumeModal';
 import { Footer } from '@/components/Footer';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,7 @@ const Index = () => {
   const { user, authToken, isLoading, login, logout } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  const [isCreateResumeModalOpen, setIsCreateResumeModalOpen] = useState(false);
   const [isLoginWarningOpen, setIsLoginWarningOpen] = useState(false);
   const [usageInfo, setUsageInfo] = useState<UsageInfo | null>(null);
   
@@ -90,6 +92,16 @@ const Index = () => {
               <span className="animate-pulse">|</span>
             </p>
           </div>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+            <Button 
+              variant="hero" 
+              size="lg"
+              onClick={() => setIsCreateResumeModalOpen(true)}
+            >
+              Create Resume
+            </Button>
+          </div>
         </div>
 
         {/* Main Content */}
@@ -118,6 +130,12 @@ const Index = () => {
         isOpen={isUpgradeModalOpen}
         onClose={() => setIsUpgradeModalOpen(false)}
         currentPlan={user?.plan || 'guest'}
+      />
+
+      {/* Create Resume Modal */}
+      <CreateResumeModal
+        isOpen={isCreateResumeModalOpen}
+        onClose={() => setIsCreateResumeModalOpen(false)}
       />
 
       {/* Login Warning Dialog */}
