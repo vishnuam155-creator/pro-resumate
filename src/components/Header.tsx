@@ -11,9 +11,10 @@ interface HeaderProps {
   } | null;
   onLoginClick: () => void;
   onLogout: () => void;
+  onProfile?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ user, onLoginClick, onLogout }) => {
+export const Header: React.FC<HeaderProps> = ({ user, onLoginClick, onLogout, onProfile }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
@@ -61,6 +62,11 @@ export const Header: React.FC<HeaderProps> = ({ user, onLoginClick, onLogout }) 
                     {user.plan}
                   </span>
                 </div>
+                {onProfile && (
+                  <Button variant="ghost" size="sm" onClick={onProfile}>
+                    Profile
+                  </Button>
+                )}
                 <Button variant="outline" size="sm" onClick={onLogout}>
                   Logout
                 </Button>
@@ -116,9 +122,16 @@ export const Header: React.FC<HeaderProps> = ({ user, onLoginClick, onLogout }) 
                         {user.plan}
                       </span>
                     </div>
-                    <Button variant="outline" size="sm" onClick={onLogout} className="w-full">
-                      Logout
-                    </Button>
+                    <div className="space-y-2">
+                      {onProfile && (
+                        <Button variant="ghost" size="sm" onClick={onProfile} className="w-full">
+                          Profile
+                        </Button>
+                      )}
+                      <Button variant="outline" size="sm" onClick={onLogout} className="w-full">
+                        Logout
+                      </Button>
+                    </div>
                   </div>
                 ) : (
                   <Button variant="hero" size="sm" onClick={onLoginClick} className="w-full">

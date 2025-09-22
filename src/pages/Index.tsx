@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
-import { AuthModal } from '@/components/AuthModal';
+import { EnhancedAuthModal } from '@/components/EnhancedAuthModal';
+import { UserProfileDashboard } from '@/components/UserProfileDashboard';
 import { ResumeUploader } from '@/components/ResumeUploader';
 import { UpgradeModal } from '@/components/UpgradeModal';
 import { CreateResumeModal } from '@/components/CreateResumeModal';
@@ -22,6 +23,7 @@ const Index = () => {
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const [isCreateResumeModalOpen, setIsCreateResumeModalOpen] = useState(false);
   const [isLoginWarningOpen, setIsLoginWarningOpen] = useState(false);
+  const [isProfileDashboardOpen, setIsProfileDashboardOpen] = useState(false);
   const [usageInfo, setUsageInfo] = useState<UsageInfo | null>(null);
   
   const [typedText, setTypedText] = useState('');
@@ -75,6 +77,7 @@ const Index = () => {
         user={user} 
         onLoginClick={() => setIsAuthModalOpen(true)}
         onLogout={logout}
+        onProfile={() => setIsProfileDashboardOpen(true)}
       />
       
       <main className="container mx-auto px-4 py-8">
@@ -119,10 +122,21 @@ const Index = () => {
       <Footer />
 
       {/* Auth Modal */}
-      <AuthModal
+      <EnhancedAuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         onAuthSuccess={handleAuthSuccess}
+      />
+
+      {/* Profile Dashboard */}
+      <UserProfileDashboard
+        isOpen={isProfileDashboardOpen}
+        onClose={() => setIsProfileDashboardOpen(false)}
+        authToken={authToken}
+        onUpgrade={() => {
+          setIsProfileDashboardOpen(false);
+          setIsUpgradeModalOpen(true);
+        }}
       />
 
       {/* Upgrade Modal */}
