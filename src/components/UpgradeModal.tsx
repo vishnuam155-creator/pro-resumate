@@ -2,18 +2,21 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Check, Crown, Zap, Star } from 'lucide-react';
+import { Check, Crown, Zap, Star, Loader2 } from 'lucide-react';
+import { usePayment } from '@/hooks/usePayment';
 
 interface UpgradeModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentPlan: string;
+  authToken?: string;
 }
 
 const plans = [
   {
     name: 'Basic',
     price: 'Free',
+    amount: 0,
     uploads: 3,
     icon: <Check className="h-5 w-5" />,
     features: [
@@ -26,6 +29,7 @@ const plans = [
   {
     name: 'Premium',
     price: '$9.99/month',
+    amount: 9.99,
     uploads: 10,
     icon: <Crown className="h-5 w-5" />,
     features: [
@@ -41,6 +45,7 @@ const plans = [
   {
     name: 'Pro',
     price: '$19.99/month',
+    amount: 19.99,
     uploads: 100,
     icon: <Star className="h-5 w-5" />,
     features: [
@@ -55,10 +60,35 @@ const plans = [
   }
 ];
 
-export const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, currentPlan }) => {
-  const handleUpgrade = (planName: string) => {
-    // In a real application, this would redirect to your payment processor
-    window.open('https://quotientone-getintouch.carrd.co/', '_blank');
+export const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, currentPlan, authToken }) => {
+  const { processPayment, isProcessing } = usePayment();
+
+  const handleUpgrade = async (planName: string, amount: number) => {
+    if (amount === 0) {
+      // Free plan - no payment needed
+      onClose();
+      return;
+    }
+
+    if (!authToken) {
+      // Redirect to contact if no auth token
+      window.open('https://quotientone-getintouch.carrd.co/', '_blank');
+      return;
+    }
+
+    const result = await processPayment(
+      {
+        planName,
+        amount,
+        currency: 'USD'
+      },
+      authToken
+    );
+
+    if (result.success && result.payment_url) {
+      // Redirect to payment page
+      window.location.href = result.payment_url;
+    }
   };
 
   return (
@@ -122,13 +152,19 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, cur
                 <Button
                   variant={plan.variant}
                   className="w-full mt-6"
-                  onClick={() => handleUpgrade(plan.name)}
-                  disabled={currentPlan.toLowerCase() === plan.name.toLowerCase()}
+                  onClick={() => handleUpgrade(plan.name, plan.amount)}
+                  disabled={currentPlan.toLowerCase() === plan.name.toLowerCase() || isProcessing}
                 >
-                  {currentPlan.toLowerCase() === plan.name.toLowerCase() 
-                    ? 'Current Plan' 
-                    : `Upgrade to ${plan.name}`
-                  }
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : currentPlan.toLowerCase() === plan.name.toLowerCase() ? (
+                    'Current Plan'
+                  ) : (
+                    `Upgrade to ${plan.name}`
+                  )}
                 </Button>
               </CardContent>
             </Card>

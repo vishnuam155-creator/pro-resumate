@@ -5,10 +5,12 @@ import { UserProfileDashboard } from '@/components/UserProfileDashboard';
 import { ResumeUploader } from '@/components/ResumeUploader';
 import { UpgradeModal } from '@/components/UpgradeModal';
 import { CreateResumeModal } from '@/components/CreateResumeModal';
+import { PaymentSuccess } from '@/components/PaymentSuccess';
 import { Footer } from '@/components/Footer';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
+import { usePayment } from '@/hooks/usePayment';
 import { Lock } from 'lucide-react';
 
 interface UsageInfo {
@@ -19,15 +21,40 @@ interface UsageInfo {
 
 const Index = () => {
   const { user, authToken, isLoading, login, logout } = useAuth();
+  const { verifyPayment } = usePayment();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const [isCreateResumeModalOpen, setIsCreateResumeModalOpen] = useState(false);
   const [isLoginWarningOpen, setIsLoginWarningOpen] = useState(false);
   const [isProfileDashboardOpen, setIsProfileDashboardOpen] = useState(false);
+  const [isPaymentSuccessOpen, setIsPaymentSuccessOpen] = useState(false);
+  const [successPlan, setSuccessPlan] = useState('');
   const [usageInfo, setUsageInfo] = useState<UsageInfo | null>(null);
   
   const [typedText, setTypedText] = useState('');
   const fullText = "Stop getting lost in the resume black hole. Our AI-powered ATS Resume Checker and Builder helps you craft a professional resume that gets noticed by recruiters";
+
+  // Check for payment success on component mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment');
+    const planParam = urlParams.get('plan');
+    const sessionId = urlParams.get('session_id');
+
+    if (paymentStatus === 'success' && planParam && sessionId && authToken) {
+      // Verify payment and update user plan
+      verifyPayment(sessionId, authToken).then((result) => {
+        if (result.success && result.plan) {
+          setSuccessPlan(result.plan);
+          setIsPaymentSuccessOpen(true);
+          
+          // Clean up URL parameters
+          const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+          window.history.replaceState({}, document.title, newUrl);
+        }
+      });
+    }
+  }, [authToken, verifyPayment]);
 
   // Typing animation effect
   useEffect(() => {
@@ -58,6 +85,13 @@ const Index = () => {
 
   const handleUsageUpdate = (usage: UsageInfo) => {
     setUsageInfo(usage);
+  };
+
+  const handlePlanUpdate = (newPlan: string) => {
+    if (user && authToken) {
+      // Update user object with new plan
+      login(authToken, user.username, newPlan);
+    }
   };
 
   if (isLoading) {
@@ -150,6 +184,15 @@ const Index = () => {
         isOpen={isUpgradeModalOpen}
         onClose={() => setIsUpgradeModalOpen(false)}
         currentPlan={user?.plan || 'guest'}
+        authToken={authToken}
+      />
+
+      {/* Payment Success Modal */}
+      <PaymentSuccess
+        isOpen={isPaymentSuccessOpen}
+        onClose={() => setIsPaymentSuccessOpen(false)}
+        newPlan={successPlan}
+        onPlanUpdate={handlePlanUpdate}
       />
 
       {/* Create Resume Modal */}
