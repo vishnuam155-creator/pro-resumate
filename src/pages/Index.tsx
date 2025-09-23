@@ -100,7 +100,13 @@ const Index = () => {
             <Button 
               variant="hero" 
               size="lg"
-              onClick={() => setIsCreateResumeModalOpen(true)}
+              onClick={() => {
+                if (user) {
+                  setIsCreateResumeModalOpen(true);
+                } else {
+                  handleLoginRequired();
+                }
+              }}
             >
               Create Resume
             </Button>
